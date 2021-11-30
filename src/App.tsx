@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import TasksList from "./components/TasksList";
 import CreateTask from "./components/CreateTask";
@@ -39,47 +39,70 @@ const INITIAL_TASKS = [
 ];
 
 const App = () => {
-    const [changedTask, setChangedTask] = useState<TaskInterface | null>(null);
     const [tasks, setTasks] = useState<TaskInterface[]>(INITIAL_TASKS);
 
-    const createTask = (task: TaskInterface) => {
-        const id = Math.floor(Math.random() * 100);
+    const [changedTaskId, setChangedTaskId] = useState<number | null>(null);
 
-        const createdTask = {
-            ...task,
-            id,
-            createdAt: new Date().toJSON(),
-        };
-
-        setTasks([...tasks, createdTask]);
-    }
-
-    const removeTask: RemoveTask = (taskId) => setTasks(tasks.filter(task => task.id !== taskId));
-
-    const onSaveChangedTask: OnSaveChangedTask = (changedTask) => {
-        setTasks(tasks.map(task => task.id === changedTask?.id ? changedTask : task));
-        setChangedTask(null);
-    }
-
-    const openChangeTask: OpenChangeTask = (taskId) => {
-        setChangedTask(tasks.find(task => task.id === taskId) || null);
-    }
-
-    const onMarkCompletedTask: OnMarkCompletedTask = () => {
-        const checkAllForCompleted = tasks.every(task => task.checked);
-
-        if (!checkAllForCompleted) {
-            setTasks(tasks.map(task => !task.checked ? ({ ...task, checked: true }) : task));
+    const changedTask = useMemo(() => {
+        if (changedTaskId !== null) {
+            return tasks.find(task => task.id === changedTaskId);
         }
-    }
 
-    const onRemoveCompletedTask: OnRemoveCompletedTask = () => {
-        const checkOneCompleted = tasks.some(task => task.checked);
+        return null;
+    }, [changedTaskId, tasks])
 
-        if (tasks.length !== 0 && checkOneCompleted) {
-            setTasks(tasks.filter(task => !task.checked));
-        }
-    }
+    const createTask = useCallback(
+        (task: TaskInterface) => {
+            const id = Math.floor(Math.random() * 100);
+
+            const createdTask = {
+                ...task,
+                id,
+                createdAt: new Date().toJSON(),
+            };
+
+            setTasks((tasks) => [...tasks, createdTask]);
+        }, []
+    );
+
+    const removeTask: RemoveTask = useCallback(
+        (taskId) => setTasks((tasks) => tasks.filter(task => task.id !== taskId)), []
+    );
+
+    const onSaveChangedTask: OnSaveChangedTask = useCallback(
+        (changedTask) => {
+            setTasks((tasks) => tasks.map(task => task.id === changedTaskId ? changedTask : task));
+            setChangedTaskId(null);
+        }, [changedTaskId]
+    );
+
+    const openChangeTask: OpenChangeTask = useCallback(
+        (taskId) => setChangedTaskId(taskId), []
+    );
+
+    const onMarkCompletedTask: OnMarkCompletedTask = useCallback(
+        () => setTasks((tasks) => {
+            const checkAllForCompleted = tasks.every(task => task.checked);
+
+            if (!checkAllForCompleted) {
+                return tasks.map(task => !task.checked ? ({ ...task, checked: true }) : task)
+            }
+
+            return tasks;
+        }), []
+    );
+
+    const onRemoveCompletedTask: OnRemoveCompletedTask = useCallback(
+        () => setTasks((tasks) => {
+            const checkOneCompleted = tasks.some(task => task.checked);
+
+            if (tasks.length !== 0 && checkOneCompleted) {
+                return tasks.filter(task => !task.checked);
+            }
+
+            return tasks;
+        }), []
+    );
 
     return (
         <>
@@ -96,7 +119,7 @@ const App = () => {
 
             {changedTask !== null && (
                 <ChangeTask
-                    changedTask={changedTask}
+                    changedTask={changedTask!}
                     onSaveTask={onSaveChangedTask}
                 />
             )}
