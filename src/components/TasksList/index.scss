@@ -1,0 +1,32 @@
+.tasks-list {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+}
+
+.list-item {
+  display: flex;
+  flex-direction: column;
+
+  position: relative;
+
+  margin-bottom: 12px;
+
+  &_title {
+    margin: 0;
+  }
+
+  &_remove, &_change {
+    position: absolute;
+
+    right: -50px;
+
+    cursor: pointer;
+  }
+
+  &_change {
+    margin-top: 25px;
+  }
+
+}
+

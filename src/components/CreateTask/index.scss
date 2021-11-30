@@ -1,0 +1,11 @@
+.create-task {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+
+  margin-top: 3rem;
+
+  &_icon {
+    cursor: pointer;
+  }
+}
