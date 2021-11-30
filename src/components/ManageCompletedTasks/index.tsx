@@ -1,9 +1,8 @@
-import { PureComponent } from "react";
+import React  from "react";
+import styled from "styled-components";
 
-import Button from "../../primitives/Button";
+import ButtonComponent from "../../primitives/Button";
 import { OnMarkCompletedTask, OnRemoveCompletedTask } from "../../types";
-
-import './index.scss';
 
 
 interface ManageCompletedTasksPropsInterface {
@@ -11,21 +10,29 @@ interface ManageCompletedTasksPropsInterface {
     onRemoveCompleted: OnRemoveCompletedTask
 }
 
-class ManageCompletedTasks extends PureComponent<ManageCompletedTasksPropsInterface> {
+const Container = styled.div`
+  display: flex;
 
-    render() {
+  margin-bottom: 3rem;
+`;
 
-        return (
-            <div className="manage-completed-tasks">
-                <Button className="manage-completed-tasks_button" onClick={this.props.onMarkCompleted}>
-                    Отметить все выполненными
-                </Button>
-                <Button className="manage-completed-tasks_button" onClick={this.props.onRemoveCompleted}>
-                    Удалить все выполненные
-                </Button>
-            </div>
-        );
-    }
-}
+const Button = styled(ButtonComponent)`
+  margin-right: 2rem;
+`;
 
-export default ManageCompletedTasks;
+const ManageCompletedTasks = (props: ManageCompletedTasksPropsInterface) => {
+    const { onMarkCompleted, onRemoveCompleted } = props;
+
+    return (
+        <Container>
+            <Button onClick={onMarkCompleted}>
+                Отметить все выполненными
+            </Button>
+            <Button onClick={onRemoveCompleted}>
+                Удалить все выполненные
+            </Button>
+        </Container>
+    );
+};
+
+export default React.memo(ManageCompletedTasks);

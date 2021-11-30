@@ -97,7 +97,7 @@ const App = () => {
             {changedTask !== null && (
                 <ChangeTask
                     changedTask={changedTask}
-                    onSave={onSaveChangedTask}
+                    onSaveTask={onSaveChangedTask}
                 />
             )}
         </>

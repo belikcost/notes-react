@@ -1,9 +1,8 @@
-import { PureComponent } from "react";
+import React from "react";
+import styled from "styled-components";
 
 import ListItem from "./Elements/ListItem";
 import { OpenChangeTask, RemoveTask, TaskInterface } from "../../types";
-
-import './index.scss';
 
 
 interface TasksListPropsInterface {
@@ -12,25 +11,29 @@ interface TasksListPropsInterface {
     openChangeTask: OpenChangeTask
 }
 
-class TasksList extends PureComponent<TasksListPropsInterface> {
+const Container = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+`;
 
-    render() {
+const TasksList = (props: TasksListPropsInterface) => {
+    const { tasks, removeTask, openChangeTask } = props;
 
-        return (
-            <div className="tasks-list">
-                {this.props.tasks.length !== 0 ? this.props.tasks.map(task => (
-                    <ListItem
-                        {...task}
-                        key={task.id}
-                        removeTask={this.props.removeTask}
-                        openChangeTask={this.props.openChangeTask}
-                    />
-                )) : (
-                    <h2>Список пуст</h2>
-                )}
-            </div>
-        );
-    }
-}
+    return (
+        <Container>
+            {tasks.length !== 0 ? tasks.map(task => (
+                <ListItem
+                    {...task}
+                    key={task.id}
+                    removeTask={removeTask}
+                    openChangeTask={openChangeTask}
+                />
+            )) : (
+                <h2>Список пуст</h2>
+            )}
+        </Container>
+    );
+};
 
-export default TasksList;
+export default React.memo(TasksList);
