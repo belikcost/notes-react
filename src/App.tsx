@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useState } from 'react';
 
 import TasksList from "./components/TasksList";
 import CreateTask from "./components/CreateTask";
@@ -14,45 +14,35 @@ import {
 } from "./types";
 
 
-interface AppStateInterface {
-    changedTask: TaskInterface | null,
-    tasks: TaskInterface[],
-}
+const INITIAL_TASKS = [
+    {
+        id: 1,
+        title: 'Hello world',
+        checked: true,
+        description: 'Say hello world',
+        createdAt: '2021-11-18T09:55:07.172Z'
+    },
+    {
+        id: 2,
+        title: 'Hello world',
+        checked: false,
+        description: 'Say hello world',
+        createdAt: '2021-11-18T09:55:07.172Z'
+    },
+    {
+        id: 3,
+        title: 'Hello world',
+        checked: true,
+        description: 'Say hello world',
+        createdAt: '2021-11-18T09:55:07.172Z'
+    },
+];
 
-class App extends Component<{}, AppStateInterface> {
+const App = () => {
+    const [changedTask, setChangedTask] = useState<TaskInterface | null>(null);
+    const [tasks, setTasks] = useState<TaskInterface[]>(INITIAL_TASKS);
 
-    constructor(props: {}) {
-        super(props);
-
-        this.state = {
-            changedTask: null,
-            tasks: [
-                {
-                    id: 1,
-                    title: 'Hello world',
-                    checked: true,
-                    description: 'Say hello world',
-                    createdAt: '2021-11-18T09:55:07.172Z'
-                },
-                {
-                    id: 2,
-                    title: 'Hello world',
-                    checked: false,
-                    description: 'Say hello world',
-                    createdAt: '2021-11-18T09:55:07.172Z'
-                },
-                {
-                    id: 3,
-                    title: 'Hello world',
-                    checked: true,
-                    description: 'Say hello world',
-                    createdAt: '2021-11-18T09:55:07.172Z'
-                },
-            ]
-        };
-    }
-
-    createTask = (task: TaskInterface) => {
+    const createTask = (task: TaskInterface) => {
         const id = Math.floor(Math.random() * 100);
 
         const createdTask = {
@@ -61,66 +51,57 @@ class App extends Component<{}, AppStateInterface> {
             createdAt: new Date().toJSON(),
         };
 
-        this.setState({ tasks: [...this.state.tasks, createdTask] });
+        setTasks([...tasks, createdTask]);
     }
 
-    removeTask: RemoveTask = (taskId) => {
-        this.setState({ tasks: this.state.tasks.filter(task => task.id !== taskId) });
+    const removeTask: RemoveTask = (taskId) => setTasks(tasks.filter(task => task.id !== taskId));
+
+    const onSaveChangedTask: OnSaveChangedTask = (changedTask) => {
+        setTasks(tasks.map(task => task.id === changedTask?.id ? changedTask : task));
+        setChangedTask(null);
     }
 
-    onSaveChangedTask: OnSaveChangedTask = (changedTask) => {
-        this.setState({
-            tasks: this.state.tasks.map(task => task.id === this.state.changedTask?.id ? changedTask : task),
-            changedTask: null
-        });
+    const openChangeTask: OpenChangeTask = (taskId) => {
+        setChangedTask(tasks.find(task => task.id === taskId) || null);
     }
 
-    openChangeTask: OpenChangeTask = (taskId) => {
-        this.setState({ changedTask: this.state.tasks.find(task => task.id === taskId) || null });
-    }
-
-    onMarkCompletedTask: OnMarkCompletedTask = () => {
-        const checkAllForCompleted = this.state.tasks.every(task => task.checked);
+    const onMarkCompletedTask: OnMarkCompletedTask = () => {
+        const checkAllForCompleted = tasks.every(task => task.checked);
 
         if (!checkAllForCompleted) {
-            this.setState({ tasks: this.state.tasks.map(task => !task.checked ? ({ ...task, checked: true }) : task) });
+            setTasks(tasks.map(task => !task.checked ? ({ ...task, checked: true }) : task));
         }
     }
 
-    onRemoveCompletedTask: OnRemoveCompletedTask = () => {
-        const checkOneCompleted = this.state.tasks.some(task => task.checked);
+    const onRemoveCompletedTask: OnRemoveCompletedTask = () => {
+        const checkOneCompleted = tasks.some(task => task.checked);
 
-        if (this.state.tasks.length !== 0 && checkOneCompleted) {
-            this.setState({ tasks: this.state.tasks.filter(task => !task.checked) });
+        if (tasks.length !== 0 && checkOneCompleted) {
+            setTasks(tasks.filter(task => !task.checked));
         }
     }
 
-    render() {
-        const { tasks, changedTask } = this.state;
+    return (
+        <>
+            <ManageCompletedTasks
+                onMarkCompleted={onMarkCompletedTask}
+                onRemoveCompleted={onRemoveCompletedTask}
+            />
+            <TasksList
+                tasks={tasks}
+                removeTask={removeTask}
+                openChangeTask={openChangeTask}
+            />
+            <CreateTask createTask={createTask}/>
 
-        return (
-            <>
-                <ManageCompletedTasks
-                    onMarkCompleted={this.onMarkCompletedTask}
-                    onRemoveCompleted={this.onRemoveCompletedTask}
+            {changedTask !== null && (
+                <ChangeTask
+                    changedTask={changedTask}
+                    onSave={onSaveChangedTask}
                 />
-                <TasksList
-                    tasks={tasks}
-                    removeTask={this.removeTask}
-                    openChangeTask={this.openChangeTask}
-                />
-                <CreateTask createTask={this.createTask}/>
-
-                {changedTask !== null && (
-                    <ChangeTask
-                        changedTask={changedTask}
-                        onSave={this.onSaveChangedTask}
-                    />
-                )}
-            </>
-        );
-    }
-}
-
+            )}
+        </>
+    );
+};
 
 export default App;
