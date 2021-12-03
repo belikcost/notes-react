@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useState } from "react";
+import React, { ChangeEvent, useCallback, useState } from "react";
 import styled from "styled-components";
 
 import Field from "../../primitives/Field";
@@ -36,13 +36,15 @@ const Content = styled.div`
   padding: 2rem 4rem;
 `;
 
-const ChangeTask = (props: ChangeTaskProps) => {
-    const { changedTask, onSaveTask } = props;
-
+const ChangeTask = ({ changedTask, onSaveTask }: ChangeTaskProps) => {
     const [task, setTask] = useState(changedTask);
 
-    const onChangeTitle = (e: ChangeEvent<HTMLInputElement>) => setTask({ ...task, title: e.target.value });
-    const onChangeDescription = (e: ChangeEvent<HTMLInputElement>) => setTask({ ...task, description: e.target.value });
+    const onChangeTitle = useCallback(
+        (e: ChangeEvent<HTMLInputElement>) => setTask({ ...task, title: e.target.value }), []
+    );
+    const onChangeDescription = useCallback(
+        (e: ChangeEvent<HTMLInputElement>) => setTask({ ...task, description: e.target.value }), []
+    );
 
     const onSave = () => onSaveTask(task);
 

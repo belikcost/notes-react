@@ -67,22 +67,4 @@ const ListItem = (props: ListItemPropsInterface) => {
     );
 };
 
-const arePropsEqual = (prevProps: ListItemPropsInterface, nextProps: ListItemPropsInterface) => {
-
-    if (prevProps.length !== nextProps.length) {
-        return false;
-    }
-
-    for (const key in nextProps) {
-        const nextPropValue = nextProps[key];
-        const prevPropValue = prevProps[key];
-
-        if (prevPropValue !== nextPropValue) {
-            return false;
-        }
-    }
-
-    return true;
-};
-
-export default React.memo(ListItem, arePropsEqual);
+export default ListItem;

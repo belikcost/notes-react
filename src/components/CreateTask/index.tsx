@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useState } from "react";
+import React, { ChangeEvent, useCallback, useState } from "react";
 import styled from "styled-components";
 
 import Field from "../../primitives/Field";
@@ -29,9 +29,7 @@ const IconContainer = styled.div`
   cursor: pointer;
 `;
 
-const CreateTask = (props: CreateTaskProps) => {
-    const { createTask } = props;
-
+const CreateTask = ({ createTask }: CreateTaskProps) => {
     const [task, setTask] = useState(INITIAL_TASK);
     const [error, setError] = useState(false);
 
@@ -52,9 +50,13 @@ const CreateTask = (props: CreateTaskProps) => {
         }
     };
 
-    const onChangeTitle = (e: ChangeEvent<HTMLInputElement>) => setTask({ ...task, title: e.target.value });
+    const onChangeTitle = useCallback(
+        (e: ChangeEvent<HTMLInputElement>) => setTask({ ...task, title: e.target.value }), []
+    );
 
-    const onChangeDescription = (e: ChangeEvent<HTMLInputElement>) => setTask({ ...task, description: e.target.value });
+    const onChangeDescription = useCallback(
+        (e: ChangeEvent<HTMLInputElement>) => setTask({ ...task, description: e.target.value }), []
+    );
 
     const { title, description } = task;
 
