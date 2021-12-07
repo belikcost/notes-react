@@ -51,11 +51,11 @@ const CreateTask = ({ createTask }: CreateTaskProps) => {
     };
 
     const onChangeTitle = useCallback(
-        (e: ChangeEvent<HTMLInputElement>) => setTask({ ...task, title: e.target.value }), []
+        (e: ChangeEvent<HTMLInputElement>) => setTask((prevTask) => ({ ...prevTask, title: e.target.value })), []
     );
 
     const onChangeDescription = useCallback(
-        (e: ChangeEvent<HTMLInputElement>) => setTask({ ...task, description: e.target.value }), []
+        (e: ChangeEvent<HTMLInputElement>) => setTask((prevTask) => ({ ...prevTask, description: e.target.value })), []
     );
 
     const { title, description } = task;
