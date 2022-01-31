@@ -1,62 +1,72 @@
-import { ChangeEvent, PureComponent } from "react";
+import React, { ChangeEvent, useCallback, useState } from "react";
+import styled from "styled-components";
 
 import Field from "../../primitives/Field";
 import Button from "../../primitives/Button";
 import { OnSaveChangedTask, TaskInterface } from "../../types";
 
-import './index.scss';
-
 
 interface ChangeTaskProps {
     changedTask: TaskInterface,
-    onSave: OnSaveChangedTask,
+    onSaveTask: OnSaveChangedTask,
 }
 
-class ChangeTask extends PureComponent<ChangeTaskProps, { task: TaskInterface }> {
+const Container = styled.div`
+  position: fixed;
 
-    constructor(props: ChangeTaskProps) {
-        super(props);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-        this.state = {
-            task: this.props.changedTask
-        };
-    }
+  width: 100%;
+  height: 100%;
 
-    onChangeTitle = (e: ChangeEvent<HTMLInputElement>) => {
-        this.setState({ ...this.state, task: {...this.state.task, title: e.target.value} });
-    }
+  top: 0;
+  right: 0;
 
-    onChangeDescription = (e: ChangeEvent<HTMLInputElement>) => {
-        this.setState({ ...this.state, task: {...this.state.task, description: e.target.value} });
-    }
+  background-color: rgba(0, 0, 0, .3);
+`;
 
-    onSave = () => {
-        this.props.onSave(this.state.task);
-    }
+const Content = styled.div`
+  display: flex;
+  flex-direction: column;
 
-    render() {
-        const task = this.state.task;
+  background-color: #fff;
 
-        return (
-            <div className="change-task-container">
-                <div className="change-task">
-                    <Field
-                        value={task.title}
-                        onChange={this.onChangeTitle}
-                        placeholder="Title"
-                    />
-                    <Field
-                        value={task.description}
-                        onChange={this.onChangeDescription}
-                        placeholder="Description"
-                    />
-                    <Button onClick={this.onSave}>
-                        Save
-                    </Button>
-                </div>
-            </div>
-        );
-    }
-}
+  padding: 2rem 4rem;
+`;
 
-export default ChangeTask;
+const ChangeTask = ({ changedTask, onSaveTask }: ChangeTaskProps) => {
+    const [task, setTask] = useState(changedTask);
+
+    const onChangeTitle = useCallback(
+        (e: ChangeEvent<HTMLInputElement>) => setTask((prevTask) => ({ ...prevTask, title: e.target.value })), []
+    );
+    const onChangeDescription = useCallback(
+        (e: ChangeEvent<HTMLInputElement>) => setTask((prevTask) => ({ ...prevTask, description: e.target.value })), []
+    );
+
+    const onSave = () => onSaveTask(task);
+
+    return (
+        <Container>
+            <Content>
+                <Field
+                    value={task.title}
+                    onChange={onChangeTitle}
+                    placeholder="Title"
+                />
+                <Field
+                    value={task.description}
+                    onChange={onChangeDescription}
+                    placeholder="Description"
+                />
+                <Button onClick={onSave}>
+                    Save
+                </Button>
+            </Content>
+        </Container>
+    );
+};
+
+export default React.memo(ChangeTask);

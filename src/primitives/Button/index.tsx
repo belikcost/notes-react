@@ -1,24 +1,35 @@
-import { MouseEventHandler, PureComponent } from "react";
-
-import './index.scss';
+import React, { MouseEventHandler, ReactChildren } from "react";
+import styled from "styled-components";
 
 
 interface ButtonPropsInterface {
     onClick: MouseEventHandler<HTMLButtonElement>,
-    className?: string,
+    children: ReactChildren | string
 }
 
-class Button extends PureComponent<ButtonPropsInterface> {
+const StyledButton = styled.button`
+  background: #000;
+  color: #fff;
 
-    render() {
-        const { onClick, className } = this.props;
+  border: none;
+  border-radius: 20px;
 
-        return (
-            <button className={`button ${className ? className : ''}`} onClick={onClick}>
-                {this.props.children}
-            </button>
-        );
-    }
-}
+  padding: 14px;
+  margin-top: 16px;
+  margin-right: 16px;
+  
+  cursor: pointer;
+`;
 
-export default Button;
+const Button = (props: ButtonPropsInterface) => {
+    const { onClick, children } = props;
+
+    return (
+        <StyledButton onClick={onClick}>
+            {children}
+        </StyledButton>
+    );
+};
+
+
+export default React.memo(Button);

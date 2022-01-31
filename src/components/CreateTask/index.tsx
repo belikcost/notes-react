@@ -1,9 +1,10 @@
-import { ChangeEvent, PureComponent } from "react";
+import React, { ChangeEvent, useCallback, useState } from "react";
+import styled from "styled-components";
 
 import Field from "../../primitives/Field";
 import { TaskInterface } from "../../types";
 
-import './index.scss';
+import './index.css';
 
 
 const INITIAL_TASK: TaskInterface = {
@@ -18,68 +19,68 @@ interface CreateTaskProps {
     createTask: (task: TaskInterface) => void
 }
 
-class CreateTask extends PureComponent<CreateTaskProps, { task: TaskInterface, error: boolean }> {
+const Container = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: start;
 
-    constructor(props: CreateTaskProps) {
-        super(props);
+  margin-top: 3rem;
+`;
 
-        this.state = {
-            task: INITIAL_TASK,
-            error: false,
-        };
-    }
+const CreateTask = ({ createTask }: CreateTaskProps) => {
+    const [task, setTask] = useState(INITIAL_TASK);
+    const [error, setError] = useState(false);
 
-    isTaskValid = () => {
-        return this.state.task.title.length !== 0;
-    }
 
-    onClick = () => {
-        if (this.isTaskValid()) {
-            this.props.createTask(this.state.task);
-            this.setState({ task: INITIAL_TASK, error: false });
+    const isTaskValid = () => {
+        return task.title.length !== 0;
+    };
+
+    const onClick = () => {
+        if (isTaskValid()) {
+            createTask(task);
+
+            setTask(INITIAL_TASK);
+            setError(false);
 
         } else {
-            this.setState({ error: true });
+            setError(true);
         }
-    }
-
-    onChangeTitle = (e: ChangeEvent<HTMLInputElement>) => {
-        this.setState({ task: { ...this.state.task, title: e.target.value } })
     };
 
-    onChangeDescription = (e: ChangeEvent<HTMLInputElement>) => {
-        this.setState({ task: { ...this.state.task, description: e.target.value } })
-    };
+    const onChangeTitle = useCallback(
+        (e: ChangeEvent<HTMLInputElement>) => setTask((prevTask) => ({ ...prevTask, title: e.target.value })), []
+    );
 
-    render() {
-        const { title, description } = this.state.task;
+    const onChangeDescription = useCallback(
+        (e: ChangeEvent<HTMLInputElement>) => setTask((prevTask) => ({ ...prevTask, description: e.target.value })), []
+    );
 
-        return (
-            <div className="create-task">
-                <Field
-                    value={title}
-                    onChange={this.onChangeTitle}
-                    placeholder="Title"
-                />
-                <Field
-                    value={description}
-                    onChange={this.onChangeDescription}
-                    placeholder="Description"
-                />
-                <span className="create-task_icon" onClick={this.onClick}>
-                    <svg fill="#000000" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24px"
-                         height="24px">
-                        <path
-                            d="M12,2C6.477,2,2,6.477,2,12s4.477,10,10,10s10-4.477,10-10S17.523,2,12,2z M16,13h-3v3c0,0.552-0.448,1-1,1h0 c-0.552,0-1-0.448-1-1v-3H8c-0.552,0-1-0.448-1-1v0c0-0.552,0.448-1,1-1h3V8c0-0.552,0.448-1,1-1h0c0.552,0,1,0.448,1,1v3h3 c0.552,0,1,0.448,1,1v0C17,12.552,16.552,13,16,13z"/>
-                    </svg>
-                </span>
+    const { title, description } = task;
 
-                {this.state.error && (
-                    <h3>Ошибка, проверьте правильность данных!</h3>
-                )}
-            </div>
-        );
-    }
-}
+    return (
+        <Container>
+            <Field
+                value={title}
+                onChange={onChangeTitle}
+                placeholder="Title"
+            />
+            <Field
+                value={description}
+                onChange={onChangeDescription}
+                placeholder="Description"
+            />
+            <span className="icon" onClick={onClick}>
+                <svg fill="#000000" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24px" height="24px">
+                    <path d="M12,2C6.477,2,2,6.477,2,12s4.477,10,10,10s10-4.477,10-10S17.523,2,12,2z M16,13h-3v3c0,0.552-0.448,1-1,1h0 c-0.552,0-1-0.448-1-1v-3H8c-0.552,0-1-0.448-1-1v0c0-0.552,0.448-1,1-1h3V8c0-0.552,0.448-1,1-1h0c0.552,0,1,0.448,1,1v3h3 c0.552,0,1,0.448,1,1v0C17,12.552,16.552,13,16,13z"/>
+                </svg>
+            </span>
 
-export default CreateTask;
+            {error && (
+                <h3>Ошибка, проверьте правильность данных!</h3>
+            )}
+        </Container>
+    );
+};
+
+export default React.memo(CreateTask);

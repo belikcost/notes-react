@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import TasksList from "./components/TasksList";
 import CreateTask from "./components/CreateTask";
@@ -14,113 +14,117 @@ import {
 } from "./types";
 
 
-interface AppStateInterface {
-    changedTask: TaskInterface | null,
-    tasks: TaskInterface[],
-}
+const INITIAL_TASKS = [
+    {
+        id: 1,
+        title: 'Hello world',
+        checked: true,
+        description: 'Say hello world',
+        createdAt: '2021-11-18T09:55:07.172Z'
+    },
+    {
+        id: 2,
+        title: 'Hello world',
+        checked: false,
+        description: 'Say hello world',
+        createdAt: '2021-11-18T09:55:07.172Z'
+    },
+    {
+        id: 3,
+        title: 'Hello world',
+        checked: true,
+        description: 'Say hello world',
+        createdAt: '2021-11-18T09:55:07.172Z'
+    },
+];
 
-class App extends Component<{}, AppStateInterface> {
+const App = () => {
+    const [tasks, setTasks] = useState<TaskInterface[]>(INITIAL_TASKS);
 
-    constructor(props: {}) {
-        super(props);
+    const [changedTaskId, setChangedTaskId] = useState<number | null>(null);
 
-        this.state = {
-            changedTask: null,
-            tasks: [
-                {
-                    id: 1,
-                    title: 'Hello world',
-                    checked: true,
-                    description: 'Say hello world',
-                    createdAt: '2021-11-18T09:55:07.172Z'
-                },
-                {
-                    id: 2,
-                    title: 'Hello world',
-                    checked: false,
-                    description: 'Say hello world',
-                    createdAt: '2021-11-18T09:55:07.172Z'
-                },
-                {
-                    id: 3,
-                    title: 'Hello world',
-                    checked: true,
-                    description: 'Say hello world',
-                    createdAt: '2021-11-18T09:55:07.172Z'
-                },
-            ]
-        };
-    }
-
-    createTask = (task: TaskInterface) => {
-        const id = Math.floor(Math.random() * 100);
-
-        const createdTask = {
-            ...task,
-            id,
-            createdAt: new Date().toJSON(),
-        };
-
-        this.setState({ tasks: [...this.state.tasks, createdTask] });
-    }
-
-    removeTask: RemoveTask = (taskId) => {
-        this.setState({ tasks: this.state.tasks.filter(task => task.id !== taskId) });
-    }
-
-    onSaveChangedTask: OnSaveChangedTask = (changedTask) => {
-        this.setState({
-            tasks: this.state.tasks.map(task => task.id === this.state.changedTask?.id ? changedTask : task),
-            changedTask: null
-        });
-    }
-
-    openChangeTask: OpenChangeTask = (taskId) => {
-        this.setState({ changedTask: this.state.tasks.find(task => task.id === taskId) || null });
-    }
-
-    onMarkCompletedTask: OnMarkCompletedTask = () => {
-        const checkAllForCompleted = this.state.tasks.every(task => task.checked);
-
-        if (!checkAllForCompleted) {
-            this.setState({ tasks: this.state.tasks.map(task => !task.checked ? ({ ...task, checked: true }) : task) });
+    const changedTask = useMemo(() => {
+        if (changedTaskId !== null) {
+            return tasks.find(task => task.id === changedTaskId);
         }
-    }
 
-    onRemoveCompletedTask: OnRemoveCompletedTask = () => {
-        const checkOneCompleted = this.state.tasks.some(task => task.checked);
+        return null;
+    }, [changedTaskId, tasks])
 
-        if (this.state.tasks.length !== 0 && checkOneCompleted) {
-            this.setState({ tasks: this.state.tasks.filter(task => !task.checked) });
-        }
-    }
+    const createTask = useCallback(
+        (task: TaskInterface) => {
+            const id = Math.floor(Math.random() * 100);
 
-    render() {
-        const { tasks, changedTask } = this.state;
+            const createdTask = {
+                ...task,
+                id,
+                createdAt: new Date().toJSON(),
+            };
 
-        return (
-            <>
-                <ManageCompletedTasks
-                    onMarkCompleted={this.onMarkCompletedTask}
-                    onRemoveCompleted={this.onRemoveCompletedTask}
+            setTasks((tasks) => [...tasks, createdTask]);
+        }, []
+    );
+
+    const removeTask: RemoveTask = useCallback(
+        (taskId) => setTasks((tasks) => tasks.filter(task => task.id !== taskId)), []
+    );
+
+    const onSaveChangedTask: OnSaveChangedTask = useCallback(
+        (changedTask) => {
+            setTasks((tasks) => tasks.map(task => task.id === changedTaskId ? changedTask : task));
+            setChangedTaskId(null);
+        }, [changedTaskId]
+    );
+
+    const openChangeTask: OpenChangeTask = useCallback(
+        (taskId) => setChangedTaskId(taskId), []
+    );
+
+    const onMarkCompletedTask: OnMarkCompletedTask = useCallback(
+        () => setTasks((tasks) => {
+            const checkAllForCompleted = tasks.every(task => task.checked);
+
+            if (!checkAllForCompleted) {
+                return tasks.map(task => !task.checked ? ({ ...task, checked: true }) : task)
+            }
+
+            return tasks;
+        }), []
+    );
+
+    const onRemoveCompletedTask: OnRemoveCompletedTask = useCallback(
+        () => setTasks((tasks) => {
+            const checkOneCompleted = tasks.some(task => task.checked);
+
+            if (tasks.length !== 0 && checkOneCompleted) {
+                return tasks.filter(task => !task.checked);
+            }
+
+            return tasks;
+        }), []
+    );
+
+    return (
+        <>
+            <ManageCompletedTasks
+                onMarkCompleted={onMarkCompletedTask}
+                onRemoveCompleted={onRemoveCompletedTask}
+            />
+            <TasksList
+                tasks={tasks}
+                removeTask={removeTask}
+                openChangeTask={openChangeTask}
+            />
+            <CreateTask createTask={createTask}/>
+
+            {changedTask !== null && (
+                <ChangeTask
+                    changedTask={changedTask!}
+                    onSaveTask={onSaveChangedTask}
                 />
-                <TasksList
-                    tasks={tasks}
-                    removeTask={this.removeTask}
-                    openChangeTask={this.openChangeTask}
-                />
-                <CreateTask createTask={this.createTask}/>
-
-                {changedTask !== null && (
-                    <ChangeTask
-                        changedTask={changedTask}
-                        onSave={this.onSaveChangedTask}
-                    />
-                )}
-            </>
-        );
-    }
-}
-
+            )}
+        </>
+    );
+};
 
 export default App;

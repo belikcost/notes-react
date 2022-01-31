@@ -1,6 +1,5 @@
-import { ChangeEventHandler, PureComponent, } from "react";
-
-import './index.scss';
+import React, { ChangeEventHandler } from "react";
+import styled from "styled-components";
 
 
 interface FieldPropsInterface {
@@ -9,23 +8,28 @@ interface FieldPropsInterface {
     onChange: ChangeEventHandler<HTMLInputElement>,
 }
 
-class Field extends PureComponent<FieldPropsInterface> {
+const Input = styled.input`
+  padding: 14px;
+  margin: 8px 0;
 
-    render() {
-        const { placeholder, value, onChange } = this.props;
+  border: 1px solid lightslategray;
+  border-radius: 20px;
+  outline: none;
+`;
 
-        return (
-            <label className="field">
-                <input
-                    value={value}
-                    onChange={onChange}
-                    placeholder={placeholder}
-                    className="field_input"
-                    type="text"
-                />
-            </label>
-        );
-    }
-}
+const Field = (props: FieldPropsInterface) => {
+    const { placeholder, value, onChange } = props;
 
-export default Field;
+    return (
+        <label>
+            <Input
+                value={value}
+                onChange={onChange}
+                placeholder={placeholder}
+                type="text"
+            />
+        </label>
+    );
+};
+
+export default React.memo(Field);
